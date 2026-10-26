@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Digital Services | Social Media Growth</title>
+
+    <meta name="description"
+          content="Digital Services - Manage your social media growth, campaigns and analytics.">
+
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <header class="navbar">
+        <a href="#" class="logo">
+            <span class="logo-icon">D</span>
+            <span>Digital<span class="accent">Services</span></span>
+        </a>
+
+        <button class="menu-toggle" id="menuToggle"
+                aria-label="Toggle navigation">☰</button>
+
+        <nav id="navigation">
+            <a href="#home">Home</a>
+            <a href="#services">Services</a>
+            <a href="#about">About</a>
+            <button class="btn btn-outline" id="navLogin">Login</button>
+            <button class="btn btn-primary" id="navRegister">Get Started</button>
+        </nav>
+    </header>
+
+    <main>
+
+        <!-- HERO SECTION -->
+        <section class="hero" id="home">
+
+            <div class="hero-content">
+                <div class="badge">
+                    <span class="status-dot"></span>
+                    YOUR DIGITAL GROWTH PARTNER
+                </div>
+
+                <h1>
+                    Grow Your Digital Presence
+                    <span class="gradient-text">The Smarter Way.</span>
+                </h1>
+
+                <p>
+                    Manage your digital campaigns, track performance
+                    and discover tools to grow your social media presence.
+                </p>
+
+                <div class="hero-buttons">
+                    <button class="btn btn-primary btn-large"
+                            id="heroRegister">
+                        Create Free Account →
+                    </button>
+
+                    <a href="#services" class="btn btn-outline btn-large">
+                        Explore Services
+                    </a>
+                </div>
+
+                <div class="hero-note">
+                    ✓ Secure Account &nbsp; ✓ Simple Dashboard
+                </div>
+            </div>
+
+            <div class="hero-visual">
+                <div class="visual-card">
+                    <div class="visual-top">
+                        <div>
+                            <span class="muted">DIGITAL SERVICES</span>
+                            <h3>Your Growth Hub</h3>
+                        </div>
+                        <span class="live-badge">● LIVE UI</span>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-icon">📈</span>
+                            <span class="muted">Campaigns</span>
+                            <h2>Manage</h2>
+                            <span class="stat-caption">Your activity</span>
+                        </div>
+
+                        <div class="stat-card">
+                            <span class="stat-icon">📊</span>
+                            <span class="muted">Analytics</span>
+                            <h2>Track</h2>
+                            <span class="stat-caption">Your performance</span>
+                        </div>
+                    </div>
+
+                    <div class="activity-card">
+                        <div class="activity-heading">
+                            <span>Account Security</span>
+                            <span class="success-text">Protected</span>
+                        </div>
+
+                        <div class="activity-bar">
+                            <div></div>
+                        </div>
+
+                        <p class="muted">
+                            Secure access to your digital workspace.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- SERVICES -->
+        <section class="section" id="services">
+
+            <div class="section-heading">
+                <span class="eyebrow">OUR SERVICES</span>
+                <h2>Everything in <span class="gradient-text">One Place</span></h2>
+                <p>Tools to manage your digital presence more effectively.</p>
+            </div>
+
+            <div class="service-grid">
+
+                <article class="service-card">
+                    <div class="service-icon instagram">◎</div>
+                    <h3>Instagram</h3>
+                    <p>
+                        Plan content, review engagement and track
+                        account performance.
+                    </p>
+                    <button class="text-link service-action"
+                            data-service="Instagram">
+                        Explore Tools →
+                    </button>
+                </article>
+
+                <article class="service-card">
+                    <div class="service-icon facebook">f</div>
+                    <h3>Facebook</h3>
+                    <p>
+                        Organize campaigns and understand page
+                        and post performance.
+                    </p>
+                    <button class="text-link service-action"
+                            data-service="Facebook">
+                        Explore Tools →
+                    </button>
+                </article>
+
+                <article class="service-card">
+                    <div class="service-icon youtube">▶</div>
+                    <h3>YouTube</h3>
+                    <p>
+                        Plan videos and analyze views and audience
+                        engagement.
+                    </p>
+                    <button class="text-link service-action"
+                            data-service="YouTube">
+                        Explore Tools →
+                    </button>
+                </article>
+
+                <article class="service-card">
+                    <div class="service-icon analytics">▥</div>
+                    <h3>Analytics</h3>
+                    <p>
+                        Keep your campaign information and performance
+                        insights organized.
+                    </p>
+                    <button class="text-link service-action"
+                            data-service="Analytics">
+                        Explore Tools →
+                    </button>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- FEATURES -->
+        <section class="section features-section" id="about">
+
+            <div class="section-heading">
+                <span class="eyebrow">WHY DIGITAL SERVICES?</span>
+                <h2>Built for a <span class="gradient-text">Better Experience</span></h2>
+            </div>
+
+            <div class="features-grid">
+
+                <div class="feature">
+                    <span>🔐</span>
+                    <h3>Secure Access</h3>
+                    <p>Email verification and protected account access.</p>
+                </div>
+
+                <div class="feature">
+                    <span>📱</span>
+                    <h3>Mobile Friendly</h3>
+                    <p>Use your digital workspace on your phone or computer.</p>
+                </div>
+
+                <div class="feature">
+                    <span>📊</span>
+                    <h3>Organized Dashboard</h3>
+                    <p>Keep track of your account and available tools.</p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta-section">
+            <div>
+                <span class="eyebrow">GET STARTED</span>
+                <h2>Your Digital Journey Starts Here.</h2>
+                <p>Create your account to access your personal workspace.</p>
+            </div>
+
+            <button class="btn btn-primary btn-large"
+                    id="bottomRegister">
+                Create Account →
+            </button>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <a href="#home" class="logo">
+            <span class="logo-icon">D</span>
+            <span>Digital<span class="accent">Services</span></span>
+        </a>
+
+        <p>Tools for authentic digital growth.</p>
+
+        <p class="copyright">
+            © <span id="year"></span> Digital Services.
+            All rights reserved.
+        </p>
+    </footer>
+
+    <!-- AUTHENTICATION MODAL -->
+    <div class="modal-overlay" id="authModal" hidden>
+
+        <div class="modal" role="dialog"
+             aria-modal="true" aria-labelledby="modalTitle">
+
+            <button class="modal-close" id="closeModal"
+                    aria-label="Close">&times;</button>
+
+            <div class="modal-brand">
+                <span class="logo-icon">D</span>
+            </div>
+
+            <h2 id="modalTitle">Create Your Account</h2>
+
+            <p class="modal-description" id="modalDescription">
+                Register with your email to get started.
+            </p>
+
+            <!-- SIGNUP FORM -->
+            <form id="signupForm" hidden>
+
+                <label for="signupUsername">Username</label>
+                <input type="text" id="signupUsername"
+                       minlength="3" maxlength="30"
+                       autocomplete="username"
+                       placeholder="Enter username" required>
+
+                <label for="signupEmail">Email Address</label>
+                <input type="email" id="signupEmail"
+                       autocomplete="email"
+                       placeholder="you@example.com" required>
+
+                <label for="signupPassword">Password</label>
+                <input type="password" id="signupPassword"
+                       minlength="8"
+                       autocomplete="new-password"
+                       placeholder="At least 8 characters" required>
+
+                <label for="signupConfirm">Confirm Password</label>
+                <input type="password" id="signupConfirm"
+                       minlength="8"
+                       autocomplete="new-password"
+                       placeholder="Re-enter password" required>
+
+                <button class="btn btn-primary full-width"
+                        type="submit">
+                    Send Verification Code
+                </button>
+
+                <p class="form-switch">
+                    Already registered?
+                    <button type="button" class="text-link"
+                            id="showLogin">Login</button>
+                </p>
+            </form>
+
+            <!-- OTP FORM -->
+            <form id="otpForm" hidden>
+
+                <label for="otpCode">Email Verification Code</label>
+
+                <input type="text" id="otpCode"
+                       inputmode="numeric"
+                       autocomplete="one-time-code"
+                       pattern="[0-9]{6}"
+                       maxlength="6"
+                       placeholder="Enter 6-digit code" required>
+
+                <p class="muted small-text">
+                    Enter the verification code sent to your email.
+                </p>
+
+                <button class="btn btn-primary full-width"
+                        type="submit">
+                    Verify Email
+                </button>
+
+                <button class="text-link resend-button"
+                        id="resendOtp" type="button">
+                    Resend Code
+                </button>
+            </form>
+
+            <!-- LOGIN FORM -->
+            <form id="loginForm" hidden>
+
+                <label for="loginEmail">Email Address</label>
+                <input type="email" id="loginEmail"
+                       autocomplete="email"
+                       placeholder="you@example.com" required>
+
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword"
+                       autocomplete="current-password"
+                       placeholder="Enter password" required>
+
+                <button class="btn btn-primary full-width"
+                        type="submit">
+                    Login
+                </button>
+
+                <p class="form-switch">
+                    <button type="button" class="text-link"
+                            id="showForgot">
+                        Forgot Password?
+                    </button>
+                </p>
+
+                <p class="form-switch">
+                    New here?
+                    <button type="button" class="text-link"
+                            id="showSignup">Create Account</button>
+                </p>
+            </form>
+
+            <!-- FORGOT PASSWORD -->
+            <form id="forgotForm" hidden>
+
+                <label for="forgotEmail">Registered Email</label>
+                <input type="email" id="forgotEmail"
+                       autocomplete="email"
+                       placeholder="you@example.com" required>
+
+                <button class="btn btn-primary full-width"
+                        type="submit">
+                    Send Recovery Link
+                </button>
+
+                <button type="button" class="text-link resend-button"
+                        id="backToLogin">
+                    Back to Login
+                </button>
+            </form>
+
+            <!-- RESET PASSWORD -->
+            <form id="resetForm" hidden>
+
+                <label for="newPassword">New Password</label>
+                <input type="password" id="newPassword"
+                       minlength="8"
+                       autocomplete="new-password"
+                       placeholder="Enter new password" required>
+
+                <label for="confirmNewPassword">Confirm New Password</label>
+                <input type="password" id="confirmNewPassword"
+                       minlength="8"
+                       autocomplete="new-password"
+                       placeholder="Re-enter new password" required>
+
+                <button class="btn btn-primary full-width"
+                        type="submit">
+                    Update Password
+                </button>
+            </form>
+
+            <div id="authMessage" class="auth-message"
+                 role="status" aria-live="polite"></div>
+
+            <p class="security-note">
+                🔒 Your account is protected by secure authentication.
+            </p>
+
+        </div>
+    </div>
+
+    <!-- USER DASHBOARD -->
+    <section class="dashboard" id="userDashboard" hidden>
+
+        <div class="dashboard-header">
+            <div>
+                <span class="eyebrow">YOUR WORKSPACE</span>
+                <h1>Welcome, <span id="dashboardUsername">User</span>!</h1>
+                <p id="dashboardEmail" class="muted"></p>
+            </div>
+
+            <button class="btn btn-outline" id="logoutButton">
+                Logout
+            </button>
+        </div>
+
+        <div class="dashboard-grid">
+
+            <div class="dashboard-card">
+                <span class="muted">Account Status</span>
+                <h2 class="success-text">Verified</h2>
+                <p>Email verification status</p>
+            </div>
+
+            <div class="dashboard-card">
+                <span class="muted">My Orders</span>
+                <h2 id="orderCount">0</h2>
+                <p>Orders recorded in your account</p>
+            </div>
+
+            <div class="dashboard-card">
+                <span class="muted">Available Tools</span>
+                <h2>4</h2>
+                <p>Explore your digital workspace</p>
+            </div>
+
+        </div>
+
+        <div class="dashboard-card dashboard-info">
+            <h2>Welcome to Digital Services</h2>
+            <p>
+                Your account is ready. Campaign management,
+                order history and other features will be connected
+                as we build the next modules.
+            </p>
+            <a href="#services" class="btn btn-primary">
+                Explore Tools
+            </a>
+        </div>
+
+    </section>
+
+</body>
+</html>
