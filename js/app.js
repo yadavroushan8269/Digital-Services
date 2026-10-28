@@ -1,150 +1,263 @@
-// Digital-Services - Main Application
+// Digital Services - Main App
 (() => {
   "use strict";
 
-  const $ = (selector) => document.querySelector(selector);
-  const $$ = (selector) => document.querySelectorAll(selector);
+  document.addEventListener("DOMContentLoaded", () => {
 
-  const modal = $("#authModal");
-  const modalTitle = $("#modalTitle");
-  const modalDescription = $("#modalDescription");
+    const $ = (selector) => document.querySelector(selector);
 
-  const forms = {
-    signup: $("#signupForm"),
-    otp: $("#otpForm"),
-    login: $("#loginForm"),
-    forgot: $("#forgotForm"),
-    reset: $("#resetForm")
-  };
+    // Main elements
+    const modal = $("#authModal");
+    const modalTitle = $("#modalTitle");
+    const modalDescription = $("#modalDescription");
+    const authMessage = $("#authMessage");
 
-  function showAuthForm(name) {
-    Object.entries(forms).forEach(([key, form]) => {
-      if (form) form.hidden = key !== name;
-    });
+    const menuToggle = $("#menuToggle");
+    const navigation = $("#navigation");
 
-    const titles = {
-      signup: ["Create Your Account", "Register with your email to get started."],
-      otp: ["Verify Your Email", "Enter the code sent to your email."],
-      login: ["Welcome Back", "Login using your email and password."],
-      forgot: ["Recover Password", "We'll send recovery instructions to your email."],
-      reset: ["Reset Password", "Choose a new password for your account."]
+    // Available authentication forms
+    const forms = {
+      signup: $("#signupForm"),
+      login: $("#loginForm"),
+      otp: $("#otpForm"),
+      forgot: $("#forgotForm"),
+      reset: $("#resetForm")
     };
 
-    const content = titles[name] || titles.login;
+    // =========================
+    // OPEN AUTH MODAL
+    // =========================
 
-    if (modalTitle) modalTitle.textContent = content[0];
-    if (modalDescription) modalDescription.textContent = content[1];
+    function openAuth(type = "signup") {
 
-    const message = $("#authMessage");
-    if (message) message.textContent = "";
-  }
+      if (!modal) {
+        console.error("Auth modal #authModal nahi mila.");
+        return;
+      }
 
-  function openAuth(name = "signup") {
-    if (!modal) return;
+      // Show modal
+      modal.hidden = false;
+      document.body.style.overflow = "hidden";
 
-    modal.hidden = false;
-    showAuthForm(name);
+      // Hide every form first
+      Object.values(forms).forEach((form) => {
+        if (form) form.hidden = true;
+      });
 
-    const firstInput = forms[name]?.querySelector("input");
-    if (firstInput) firstInput.focus();
-  }
+      // Clear previous message
+      if (authMessage) {
+        authMessage.textContent = "";
+      }
 
-  function closeAuth() {
-    if (modal) modal.hidden = true;
-  }
+      // Show selected form
+      const selectedForm = forms[type];
 
-  // Expose this helper for auth.js.
-  window.showAuthForm = showAuthForm;
-  window.openDigitalServicesAuth = openAuth;
-  window.closeDigitalServicesAuth = closeAuth;
+      if (!selectedForm) {
+        console.error("Authentication form nahi mila:", type);
+        return;
+      }
 
-  // Authentication modal buttons.
-  $("#navLogin")?.addEventListener("click", () => openAuth("login"));
-  $("#navRegister")?.addEventListener("click", () => openAuth("signup"));
-  $("#heroRegister")?.addEventListener("click", () => openAuth("signup"));
-  $("#bottomRegister")?.addEventListener("click", () => openAuth("signup"));
+      selectedForm.hidden = false;
 
-  $("#closeModal")?.addEventListener("click", closeAuth);
+      // Update title and description
+      const titles = {
+        signup: "Create Your Account",
+        login: "Welcome Back",
+        otp: "Verify Your Email",
+        forgot: "Reset Your Password",
+        reset: "Choose a New Password"
+      };
 
-  modal?.addEventListener("click", (event) => {
-    if (event.target === modal) closeAuth();
-  });
+      const descriptions = {
+        signup: "Register with your email to get started.",
+        login: "Login to your Digital Services account.",
+        otp: "Enter the verification code from your email.",
+        forgot: "We'll send password recovery instructions to your email.",
+        reset: "Enter and confirm your new password."
+      };
 
-  // Switch between forms.
-  $("#showLogin")?.addEventListener("click", () => showAuthForm("login"));
-  $("#showSignup")?.addEventListener("click", () => showAuthForm("signup"));
-  $("#showForgot")?.addEventListener("click", () => showAuthForm("forgot"));
-  $("#backToLogin")?.addEventListener("click", () => showAuthForm("login"));
+      if (modalTitle) {
+        modalTitle.textContent = titles[type] || "Digital Services";
+      }
 
-  // Mobile navigation.
-  const menuToggle = $("#menuToggle");
-  const navigation = $("#navigation");
+      if (modalDescription) {
+        modalDescription.textContent =
+          descriptions[type] || "";
+      }
 
-  menuToggle?.addEventListener("click", () => {
-    const expanded = menuToggle.getAttribute("aria-expanded") === "true";
+      // Focus first input
+      const firstInput = selectedForm.querySelector(
+        'input:not([readonly])'
+      );
 
-    menuToggle.setAttribute("aria-expanded", String(!expanded));
-    navigation?.classList.toggle("active", !expanded);
-  });
+      if (firstInput) {
+        setTimeout(() => firstInput.focus(), 100);
+      }
 
-  $$("#navigation a").forEach((link) => {
-    link.addEventListener("click", () => {
-      navigation?.classList.remove("active");
-      menuToggle?.setAttribute("aria-expanded", "false");
-    });
-  });
+      // Close mobile navigation
+      if (navigation) navigation.classList.remove("open");
 
-  // Close modal with Escape.
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeAuth();
-  });
+      if (menuToggle) {
+        menuToggle.setAttribute("aria-expanded", "false");
+      }
+    }
 
-  // Footer year.
-  const year = $("#year");
-  if (year) year.textContent = String(new Date().getFullYear());
+    // =========================
+    // CLOSE AUTH MODAL
+    // =========================
 
-  // Service cards: informational demo only.
-  $$(".service-action").forEach((button) => {
-    button.addEventListener("click", () => {
-      const service = button.dataset.service || "Digital Services";
+    function closeAuth() {
+      if (!modal) return;
 
-      if (!window.DigitalServicesAuth) {
+      modal.hidden = true;
+      document.body.style.overflow = "";
+    }
+
+    // Make functions available to auth.js
+    window.openDigitalServicesAuth = openAuth;
+    window.closeDigitalServicesAuth = closeAuth;
+    window.showAuthForm = openAuth;
+
+    // =========================
+    // REGISTER BUTTONS
+    // =========================
+
+    [
+      "#navRegister",
+      "#heroRegister",
+      "#bottomRegister"
+    ].forEach((selector) => {
+      const button = $(selector);
+
+      button?.addEventListener("click", (event) => {
+        event.preventDefault();
         openAuth("signup");
-        return;
-      }
-
-      const supabase = window.digitalServicesSupabase;
-
-      if (!supabase) {
-        alert("Supabase connection setup check karo.");
-        return;
-      }
-
-      supabase.auth.getUser().then(({ data }) => {
-        if (!data.user) {
-          openAuth("login");
-          return;
-        }
-
-        alert(
-          `${service}\n\n` +
-          "Ye service abhi demo mode mein hai. " +
-          "Real integrations baad mein connect hongi."
-        );
-      }).catch(() => {
-        alert("Abhi service load nahi hui. Dobara try karo.");
       });
     });
-  });
 
-  // Refresh dashboard when auth changes.
-  window.addEventListener("ds:auth-changed", (event) => {
-    const user = event.detail?.user;
+    // =========================
+    // LOGIN BUTTON
+    // =========================
 
-    if (user) {
-      closeAuth();
-      window.DigitalServicesDashboard?.show(user);
+    $("#navLogin")?.addEventListener("click", () => {
+      openAuth("login");
+    });
+
+    // =========================
+    // SWITCH BETWEEN FORMS
+    // =========================
+
+    $("#showLogin")?.addEventListener("click", () => {
+      openAuth("login");
+    });
+
+    $("#showSignup")?.addEventListener("click", () => {
+      openAuth("signup");
+    });
+
+    $("#showForgot")?.addEventListener("click", () => {
+      openAuth("forgot");
+    });
+
+    $("#backToLogin")?.addEventListener("click", () => {
+      openAuth("login");
+    });
+
+    // =========================
+    // CLOSE BUTTON
+    // =========================
+
+    $("#closeModal")?.addEventListener("click", closeAuth);
+
+    // Close when clicking outside the modal box
+    modal?.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        closeAuth();
+      }
+    });
+
+    // Close modal using Escape
+    document.addEventListener("keydown", (event) => {
+      if (
+        event.key === "Escape" &&
+        modal &&
+        !modal.hidden
+      ) {
+        closeAuth();
+      }
+    });
+
+    // =========================
+    // MOBILE NAVIGATION
+    // =========================
+
+    menuToggle?.addEventListener("click", () => {
+      const isOpen = navigation?.classList.toggle("open");
+
+      menuToggle.setAttribute(
+        "aria-expanded",
+        String(Boolean(isOpen))
+      );
+    });
+
+    // Close menu after clicking a navigation link
+    navigation?.querySelectorAll('a[href^="#"]').forEach((link) => {
+      link.addEventListener("click", () => {
+        navigation.classList.remove("open");
+
+        menuToggle?.setAttribute(
+          "aria-expanded",
+          "false"
+        );
+      });
+    });
+
+    // =========================
+    // SERVICES BUTTONS
+    // =========================
+
+    document.querySelectorAll(".service-action").forEach((button) => {
+      button.addEventListener("click", () => {
+        const service = button.dataset.service || "Services";
+
+        // Store selected service for later use
+        sessionStorage.setItem("ds_selected_service", service);
+
+        // Scroll to services section; don't open black modal
+        $("#services")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      });
+    });
+
+    // =========================
+    // FOOTER YEAR
+    // =========================
+
+    const yearElement = $("#year");
+
+    if (yearElement) {
+      yearElement.textContent = new Date().getFullYear();
     }
-  });
 
+    // =========================
+    // PASSWORD RESET LINK
+    // =========================
+
+    // If Supabase returns a password recovery link,
+    // show the reset form.
+    const hash = window.location.hash;
+
+    if (
+      hash.includes("type=recovery") ||
+      hash.includes("error_description")
+    ) {
+      if (hash.includes("type=recovery")) {
+        openAuth("reset");
+      }
+    }
+
+    console.log("Digital Services app initialized.");
+  });
 })();
