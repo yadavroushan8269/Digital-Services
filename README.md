@@ -28,12 +28,43 @@ social media campaigns, account access, and analytics.
 
 ```text
 Digital-Services/
+│
 ├── index.html
-├── style.css
-├── script.js
 ├── README.md
-└── render.yaml
-```
+├── render.yaml
+│
+├── assets/
+│   ├── images/
+│   │   └── logo.svg
+│   │
+│   └── icons/
+│
+├── css/
+│   ├── style.css
+│   ├── auth.css
+│   ├── dashboard.css
+│   └── responsive.css
+│
+├── js/
+│   ├── app.js
+│   ├── supabase.js
+│   ├── auth.js
+│   ├── dashboard.js
+│   ├── services.js
+│   └── orders.js
+│
+├── pages/
+│   ├── login.html
+│   ├── register.html
+│   ├── dashboard.html
+│   ├── services.html
+│   ├── orders.html
+│   ├── wallet.html
+│   ├── profile.html
+│   └── support.html
+│
+└── database/
+    └── schema.sql```
 
 Additional configuration files will be added as the project grows.
 
