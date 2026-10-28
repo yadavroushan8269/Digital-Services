@@ -1,296 +1,150 @@
-/* ==========================================
-   DIGITAL-SERVICES
-   MAIN APPLICATION
-   Navigation | Modal | UI Initialization
-========================================== */
-
-(function () {
+// Digital-Services - Main Application
+(() => {
   "use strict";
 
-  const $ = (id) => document.getElementById(id);
+  const $ = (selector) => document.querySelector(selector);
+  const $$ = (selector) => document.querySelectorAll(selector);
 
-  /* ------------------------------------------
-     Safe Event Helpers
-  ------------------------------------------ */
+  const modal = $("#authModal");
+  const modalTitle = $("#modalTitle");
+  const modalDescription = $("#modalDescription");
 
-  function onClick(id, callback) {
-    const element = $(id);
+  const forms = {
+    signup: $("#signupForm"),
+    otp: $("#otpForm"),
+    login: $("#loginForm"),
+    forgot: $("#forgotForm"),
+    reset: $("#resetForm")
+  };
 
-    if (element) {
-      element.addEventListener("click", callback);
-    }
+  function showAuthForm(name) {
+    Object.entries(forms).forEach(([key, form]) => {
+      if (form) form.hidden = key !== name;
+    });
+
+    const titles = {
+      signup: ["Create Your Account", "Register with your email to get started."],
+      otp: ["Verify Your Email", "Enter the code sent to your email."],
+      login: ["Welcome Back", "Login using your email and password."],
+      forgot: ["Recover Password", "We'll send recovery instructions to your email."],
+      reset: ["Reset Password", "Choose a new password for your account."]
+    };
+
+    const content = titles[name] || titles.login;
+
+    if (modalTitle) modalTitle.textContent = content[0];
+    if (modalDescription) modalDescription.textContent = content[1];
+
+    const message = $("#authMessage");
+    if (message) message.textContent = "";
   }
 
-  /* ------------------------------------------
-     Authentication Modal
-  ------------------------------------------ */
+  function openAuth(name = "signup") {
+    if (!modal) return;
 
-  function openAuthModal(formId = "signupForm") {
-    const modal = $("authModal");
+    modal.hidden = false;
+    showAuthForm(name);
 
-    if (modal) {
-      modal.style.display = "flex";
-      modal.setAttribute("aria-hidden", "false");
-    }
+    const firstInput = forms[name]?.querySelector("input");
+    if (firstInput) firstInput.focus();
+  }
 
-    if (
-      window.DigitalServicesAuth &&
-      typeof window.DigitalServicesAuth.showAuthForm === "function"
-    ) {
-      window.DigitalServicesAuth.showAuthForm(formId);
-    } else {
-      const form = $(formId);
+  function closeAuth() {
+    if (modal) modal.hidden = true;
+  }
 
-      if (form) {
-        form.style.display = "block";
+  // Expose this helper for auth.js.
+  window.showAuthForm = showAuthForm;
+  window.openDigitalServicesAuth = openAuth;
+  window.closeDigitalServicesAuth = closeAuth;
+
+  // Authentication modal buttons.
+  $("#navLogin")?.addEventListener("click", () => openAuth("login"));
+  $("#navRegister")?.addEventListener("click", () => openAuth("signup"));
+  $("#heroRegister")?.addEventListener("click", () => openAuth("signup"));
+  $("#bottomRegister")?.addEventListener("click", () => openAuth("signup"));
+
+  $("#closeModal")?.addEventListener("click", closeAuth);
+
+  modal?.addEventListener("click", (event) => {
+    if (event.target === modal) closeAuth();
+  });
+
+  // Switch between forms.
+  $("#showLogin")?.addEventListener("click", () => showAuthForm("login"));
+  $("#showSignup")?.addEventListener("click", () => showAuthForm("signup"));
+  $("#showForgot")?.addEventListener("click", () => showAuthForm("forgot"));
+  $("#backToLogin")?.addEventListener("click", () => showAuthForm("login"));
+
+  // Mobile navigation.
+  const menuToggle = $("#menuToggle");
+  const navigation = $("#navigation");
+
+  menuToggle?.addEventListener("click", () => {
+    const expanded = menuToggle.getAttribute("aria-expanded") === "true";
+
+    menuToggle.setAttribute("aria-expanded", String(!expanded));
+    navigation?.classList.toggle("active", !expanded);
+  });
+
+  $$("#navigation a").forEach((link) => {
+    link.addEventListener("click", () => {
+      navigation?.classList.remove("active");
+      menuToggle?.setAttribute("aria-expanded", "false");
+    });
+  });
+
+  // Close modal with Escape.
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeAuth();
+  });
+
+  // Footer year.
+  const year = $("#year");
+  if (year) year.textContent = String(new Date().getFullYear());
+
+  // Service cards: informational demo only.
+  $$(".service-action").forEach((button) => {
+    button.addEventListener("click", () => {
+      const service = button.dataset.service || "Digital Services";
+
+      if (!window.DigitalServicesAuth) {
+        openAuth("signup");
+        return;
       }
-    }
 
-    document.body.classList.add("modal-open");
-  }
+      const supabase = window.digitalServicesSupabase;
 
-  function closeAuthModal() {
-    const modal = $("authModal");
-
-    if (modal) {
-      modal.style.display = "none";
-      modal.setAttribute("aria-hidden", "true");
-    }
-
-    document.body.classList.remove("modal-open");
-  }
-
-  /* ------------------------------------------
-     Mobile Navigation
-  ------------------------------------------ */
-
-  function initNavigation() {
-    const menuButton = $("menuToggle");
-    const navigation = $("navigation");
-
-    if (!menuButton || !navigation) return;
-
-    menuButton.setAttribute("aria-expanded", "false");
-
-    menuButton.addEventListener("click", function () {
-      const isOpen = navigation.classList.toggle("open");
-
-      menuButton.setAttribute(
-        "aria-expanded",
-        String(isOpen)
-      );
-    });
-
-    navigation.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", () => {
-        navigation.classList.remove("open");
-
-        menuButton.setAttribute("aria-expanded", "false");
-      });
-    });
-  }
-
-  /* ------------------------------------------
-     Authentication Buttons
-  ------------------------------------------ */
-
-  function initAuthButtons() {
-    onClick("navLogin", () =>
-      openAuthModal("loginForm")
-    );
-
-    onClick("navRegister", () =>
-      openAuthModal("signupForm")
-    );
-
-    onClick("heroRegister", () =>
-      openAuthModal("signupForm")
-    );
-
-    onClick("bottomRegister", () =>
-      openAuthModal("signupForm")
-    );
-
-    onClick("closeModal", closeAuthModal);
-
-    onClick("showLogin", () =>
-      openAuthModal("loginForm")
-    );
-
-    onClick("showSignup", () =>
-      openAuthModal("signupForm")
-    );
-
-    onClick("showForgot", () =>
-      openAuthModal("forgotForm")
-    );
-
-    // Close modal when clicking its backdrop.
-
-    const modal = $("authModal");
-
-    if (modal) {
-      modal.addEventListener("click", (event) => {
-        if (event.target === modal) {
-          closeAuthModal();
-        }
-      });
-    }
-
-    // Escape key closes the modal.
-
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") {
-        closeAuthModal();
+      if (!supabase) {
+        alert("Supabase connection setup check karo.");
+        return;
       }
-    });
-  }
 
-  /* ------------------------------------------
-     Session UI
-  ------------------------------------------ */
-
-  function updateAuthUI(user) {
-    const dashboard = $("userDashboard");
-    const usernameElement = $("dashboardUsername");
-    const emailElement = $("dashboardEmail");
-
-    if (dashboard) {
-      dashboard.style.display = user ? "block" : "none";
-    }
-
-    if (usernameElement) {
-      usernameElement.textContent =
-        user?.user_metadata?.username ||
-        user?.email?.split("@")[0] ||
-        "User";
-    }
-
-    if (emailElement) {
-      emailElement.textContent = user?.email || "";
-    }
-
-    // Hide the auth modal after successful login.
-
-    if (user) {
-      closeAuthModal();
-    }
-  }
-
-  async function initializeSession() {
-    if (
-      !window.DigitalServicesAuth ||
-      typeof window.DigitalServicesAuth.getCurrentUser !== "function"
-    ) {
-      return;
-    }
-
-    try {
-      const user =
-        await window.DigitalServicesAuth.getCurrentUser();
-
-      updateAuthUI(user);
-    } catch (error) {
-      console.error("Session initialization failed.");
-    }
-  }
-
-  /* ------------------------------------------
-     Authentication State Listener
-  ------------------------------------------ */
-
-  function initAuthStateListener() {
-    window.addEventListener("ds:auth-changed", (event) => {
-      const user = event.detail?.user || null;
-
-      updateAuthUI(user);
-    });
-  }
-
-  /* ------------------------------------------
-     Service Buttons
-  ------------------------------------------ */
-
-  function initServiceButtons() {
-    document.querySelectorAll(".service-action").forEach((button) => {
-      button.addEventListener("click", () => {
-        const serviceName =
-          button.dataset.service || "selected service";
-
-        const userDashboard = $("userDashboard");
-
-        if (userDashboard && userDashboard.style.display !== "block") {
-          openAuthModal("loginForm");
+      supabase.auth.getUser().then(({ data }) => {
+        if (!data.user) {
+          openAuth("login");
           return;
         }
 
         alert(
-          serviceName +
-          ": service ordering abhi setup nahi hua hai."
+          `${service}\n\n` +
+          "Ye service abhi demo mode mein hai. " +
+          "Real integrations baad mein connect hongi."
         );
+      }).catch(() => {
+        alert("Abhi service load nahi hui. Dobara try karo.");
       });
     });
-  }
+  });
 
-  /* ------------------------------------------
-     General UI
-  ------------------------------------------ */
+  // Refresh dashboard when auth changes.
+  window.addEventListener("ds:auth-changed", (event) => {
+    const user = event.detail?.user;
 
-  function initCurrentYear() {
-    document.querySelectorAll("[data-current-year]").forEach((element) => {
-      element.textContent = new Date().getFullYear();
-    });
-  }
+    if (user) {
+      closeAuth();
+      window.DigitalServicesDashboard?.show(user);
+    }
+  });
 
-  function initSmoothScrolling() {
-    document.querySelectorAll('a[href^="#"]').forEach((link) => {
-      link.addEventListener("click", (event) => {
-        const targetId = link.getAttribute("href");
-
-        if (!targetId || targetId === "#") return;
-
-        const target = document.querySelector(targetId);
-
-        if (target) {
-          event.preventDefault();
-
-          target.scrollIntoView({
-            behavior: "smooth",
-            block: "start"
-          });
-        }
-      });
-    });
-  }
-
-  /* ------------------------------------------
-     App Initialization
-  ------------------------------------------ */
-
-  function initApp() {
-    initNavigation();
-    initAuthButtons();
-    initAuthStateListener();
-    initServiceButtons();
-    initCurrentYear();
-    initSmoothScrolling();
-
-    initializeSession();
-
-    console.log("Digital-Services app initialized.");
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initApp);
-  } else {
-    initApp();
-  }
-
-  // Expose only the UI functions needed elsewhere.
-
-  window.DigitalServicesApp = {
-    openAuthModal,
-    closeAuthModal,
-    updateAuthUI
-  };
 })();
