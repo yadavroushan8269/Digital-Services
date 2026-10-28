@@ -9,10 +9,10 @@
   // Replace these placeholders with your own
   // Supabase Project URL and Publishable Key.
 
-  const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
+  const SUPABASE_URL = "https://qzkqkfmueejeyjjdqfts.supabase.co/rest/v1/";
 
   const SUPABASE_PUBLISHABLE_KEY =
-    "YOUR_SUPABASE_PUBLISHABLE_KEY";
+    "sb_publishable_Ua7940LgyOi8a7g7zTFzdg_xLojVla_";
 
   // Prevent duplicate initialization.
 
@@ -32,9 +32,9 @@
   // Check configuration.
 
   if (
-    SUPABASE_URL === "YOUR_SUPABASE_PROJECT_URL" ||
+    SUPABASE_URL === "https://qzkqkfmueejeyjjdqfts.supabase.co/rest/v1/" ||
     SUPABASE_PUBLISHABLE_KEY ===
-      "YOUR_SUPABASE_PUBLISHABLE_KEY"
+      "sb_publishable_Ua7940LgyOi8a7g7zTFzdg_xLojVla_"
   ) {
     console.warn(
       "Digital-Services: Add your Supabase project URL and publishable key."
