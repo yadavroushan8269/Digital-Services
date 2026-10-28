@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Our Services | Digital Services</title>
+
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase.js" defer></script>
+  <script src="../js/auth.js" defer></script>
+  <script src="../js/services.js" defer></script>
+  <script src="../js/app.js" defer></script>
+</head>
+
+<body>
+
+  <header class="header">
+    <nav class="navbar">
+      <a href="../index.html" class="logo">Digital Services</a>
+
+      <div class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="orders.html">My Orders</a>
+        <a href="wallet.html">Wallet</a>
+        <a href="profile.html">Profile</a>
+        <a href="login.html">Login</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="dashboard-container">
+
+    <section class="dashboard-heading">
+      <h1>Our Digital Services</h1>
+      <p>Explore our services and choose the option that suits your needs.</p>
+    </section>
+
+    <section class="services-grid">
+
+      <article class="service-card">
+        <h2>Social Media Management</h2>
+        <p>
+          Manage your social media presence with content planning
+          and account performance insights.
+        </p>
+        <p class="service-price">Price: Contact for details</p>
+        <button
+          type="button"
+          class="btn btn-primary service-order-btn"
+          data-service="Social Media Management">
+          Choose Service
+        </button>
+      </article>
+
+      <article class="service-card">
+        <h2>Content Creation</h2>
+        <p>
+          Get help planning and creating engaging content
+          for your digital platforms.
+        </p>
+        <p class="service-price">Price: Contact for details</p>
+        <button
+          type="button"
+          class="btn btn-primary service-order-btn"
+          data-service="Content Creation">
+          Choose Service
+        </button>
+      </article>
+
+      <article class="service-card">
+        <h2>Digital Marketing</h2>
+        <p>
+          Plan digital campaigns and review their performance
+          with clear reporting.
+        </p>
+        <p class="service-price">Price: Contact for details</p>
+        <button
+          type="button"
+          class="btn btn-primary service-order-btn"
+          data-service="Digital Marketing">
+          Choose Service
+        </button>
+      </article>
+
+      <article class="service-card">
+        <h2>Analytics & Reporting</h2>
+        <p>
+          Understand engagement trends and track your
+          digital campaign performance.
+        </p>
+        <p class="service-price">Price: Contact for details</p>
+        <button
+          type="button"
+          class="btn btn-primary service-order-btn"
+          data-service="Analytics and Reporting">
+          Choose Service
+        </button>
+      </article>
+
+    </section>
+
+    <section class="dashboard-section">
+      <h2>Need Help?</h2>
+      <p>Contact our support team if you have questions about a service.</p>
+      <a href="support.html" class="btn btn-primary">Contact Support</a>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>
+      &copy; <span id="year"></span> Digital Services.
+      All rights reserved.
+    </p>
+  </footer>
+
+</body>
+</html>
