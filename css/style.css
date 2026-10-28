@@ -1382,3 +1382,82 @@ footer p,
     outline: 2px solid var(--cyan);
     outline-offset: 3px;
 }
+/* FIX: AUTH MODAL BLACK SCREEN */
+#authModal[hidden] {
+  display: none !important;
+}
+
+#authModal:not([hidden]) {
+  display: flex !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99999 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 20px !important;
+  overflow-y: auto !important;
+  background: rgba(0, 0, 0, 0.88) !important;
+  backdrop-filter: none !important;
+}
+
+#authModal .modal {
+  display: block !important;
+  position: relative !important;
+  width: 100% !important;
+  max-width: 460px !important;
+  max-height: 85vh !important;
+  overflow-y: auto !important;
+  margin: auto !important;
+  padding: 28px 22px !important;
+  color: #e8fff5 !important;
+  background: #09121a !important;
+  border: 1px solid #00ff9c !important;
+  border-radius: 16px !important;
+  opacity: 1 !important;
+  filter: none !important;
+  visibility: visible !important;
+  box-shadow: 0 0 30px rgba(0, 255, 156, 0.18) !important;
+}
+
+#authModal .modal h2,
+#authModal .modal p,
+#authModal .modal label {
+  color: #e8fff5;
+}
+
+#authModal .modal form[hidden] {
+  display: none !important;
+}
+
+#authModal .modal form:not([hidden]) {
+  display: block !important;
+}
+
+#authModal .modal input {
+  display: block !important;
+  width: 100% !important;
+  min-height: 46px !important;
+  margin-bottom: 12px !important;
+  padding: 12px !important;
+  color: #ffffff !important;
+  background: #05080d !important;
+  border: 1px solid #17694d !important;
+  border-radius: 8px !important;
+}
+
+#authModal .modal button {
+  visibility: visible !important;
+}
+
+#authModal .modal .btn-primary {
+  color: #001b11 !important;
+  background: #00ff9c !important;
+}
+
+#authModal .modal .text-link {
+  color: #00ff9c !important;
+}
+
+body:has(#authModal:not([hidden])) {
+  overflow: hidden;
+}
