@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>My Wallet | Digital Services</title>
+
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase.js" defer></script>
+  <script src="../js/auth.js" defer></script>
+  <script src="../js/app.js" defer></script>
+</head>
+
+<body>
+
+  <header class="header">
+    <nav class="navbar">
+      <a href="../index.html" class="logo">Digital Services</a>
+
+      <div class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="services.html">Services</a>
+        <a href="order.html">My Orders</a>
+        <a href="profile.html">Profile</a>
+        <a href="support.html">Support</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="dashboard-container">
+
+    <section class="dashboard-heading">
+      <h1>My Wallet</h1>
+      <p>View your available balance and transaction history.</p>
+    </section>
+
+    <section class="dashboard-stats">
+
+      <article class="stat-card">
+        <h2>Available Balance</h2>
+        <p id="walletBalance">₹0.00</p>
+      </article>
+
+      <article class="stat-card">
+        <h2>Total Added</h2>
+        <p id="totalAdded">₹0.00</p>
+      </article>
+
+      <article class="stat-card">
+        <h2>Total Spent</h2>
+        <p id="totalSpent">₹0.00</p>
+      </article>
+
+    </section>
+
+    <section class="dashboard-section">
+      <h2>Wallet Information</h2>
+
+      <p>
+        Your wallet balance and transaction details will appear here
+        when the wallet system is connected.
+      </p>
+
+      <p id="walletMessage" role="status" aria-live="polite"></p>
+
+      <div class="dashboard-actions">
+        <a href="services.html" class="btn btn-primary">
+          Browse Services
+        </a>
+
+        <a href="order.html" class="btn btn-primary">
+          View Orders
+        </a>
+
+        <a href="support.html" class="btn btn-primary">
+          Contact Support
+        </a>
+      </div>
+    </section>
+
+    <section class="dashboard-section">
+
+      <h2>Transaction History</h2>
+
+      <div class="table-responsive">
+        <table class="data-table">
+
+          <thead>
+            <tr>
+              <th>Transaction ID</th>
+              <th>Description</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody id="transactionsTableBody">
+            <tr>
+              <td colspan="6">No transaction data available yet.</td>
+            </tr>
+          </tbody>
+
+        </table>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>
+      &copy; <span id="year"></span> Digital Services.
+      All rights reserved.
+    </p>
+  </footer>
+
+</body>
+</html>
