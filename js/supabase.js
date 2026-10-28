@@ -3,10 +3,10 @@
 (function () {
     // Apne Supabase project ki details yahan daalo.
     const SUPABASE_URL =
-        "https://YOUR_PROJECT_ID.supabase.co";
+        "https://https://qzkqkfmueejeyjjdqfts.supabase.co/rest/v1/";
 
     const SUPABASE_KEY =
-        "YOUR_SUPABASE_PUBLISHABLE_KEY";
+        "sb_publishable_Ua7940LgyOi8a7g7zTFzdg_xLojVla_";
 
     // Check whether Supabase library loaded.
     if (!window.supabase || !window.supabase.createClient) {
