@@ -1,10 +1,13 @@
-// Digital Services - Authentication
+// ============================================
+// DIGITAL SERVICES — COMPLETE AUTHENTICATION
+// Supabase + Modal + Signup + Login + Recovery
+// ============================================
+
 (() => {
   "use strict";
 
   const supabase = window.digitalServicesSupabase;
 
-  // Supabase client check
   if (!supabase) {
     console.error(
       "Supabase client nahi mila. js/supabase.js check karo."
@@ -14,15 +17,46 @@
 
   const $ = (selector) => document.querySelector(selector);
 
-  // Show message on page
-  function showMessage(element, message, isError = false) {
+  const modalOverlay = $("#authModal");
+  const modal = modalOverlay?.querySelector(".modal");
+
+  const forms = {
+    signup: $("#signupForm"),
+    otp: $("#otpForm"),
+    login: $("#loginForm"),
+    forgot: $("#forgotForm"),
+    reset: $("#resetForm")
+  };
+
+  let pendingSignup = null;
+
+  // --------------------------------------------
+  // MESSAGE
+  // --------------------------------------------
+
+  function showMessage(message, isError = false) {
+    const element = $("#authMessage");
+
     if (!element) return;
 
     element.textContent = message;
-    element.style.color = isError ? "#dc2626" : "#15803d";
+    element.style.color = isError ? "#ff6b81" : "#00ff9c";
+    element.style.display = "block";
   }
 
-  // Disable button while request is processing
+  function clearMessage() {
+    const element = $("#authMessage");
+
+    if (element) {
+      element.textContent = "";
+      element.style.display = "none";
+    }
+  }
+
+  // --------------------------------------------
+  // LOADING BUTTON
+  // --------------------------------------------
+
   function setLoading(button, loading, originalText) {
     if (!button) return;
 
@@ -32,7 +66,10 @@
       : originalText;
   }
 
-  // Friendly error messages
+  // --------------------------------------------
+  // ERROR MESSAGES
+  // --------------------------------------------
+
   function friendlyError(error) {
     const message = error?.message || "";
 
@@ -41,102 +78,237 @@
     }
 
     if (/already registered|already exists/i.test(message)) {
-      return "Is email se account pehle se bana hua hai. Login try karo.";
+      return "Is email se account pehle se hai. Login try karo.";
     }
 
-    if (/password/i.test(message) && /least|short|weak/i.test(message)) {
-      return "Password thoda strong rakho.";
+    if (/email not confirmed/i.test(message)) {
+      return "Pehle email confirmation complete karo.";
     }
 
     if (/rate limit|too many requests/i.test(message)) {
       return "Bahut attempts ho gaye. Thodi der baad try karo.";
     }
 
-    if (/email not confirmed/i.test(message)) {
-      return "Pehle apne email par aaya confirmation link click karo.";
+    if (/password/i.test(message) && /weak|short|least/i.test(message)) {
+      return "Password aur strong rakho.";
+    }
+
+    if (/network|fetch/i.test(message)) {
+      return "Internet connection check karke dobara try karo.";
     }
 
     return message || "Kuch problem hui. Dobara try karo.";
   }
 
-  // Send authentication event to the website
-  function notifyAuthChanged(user) {
-    window.dispatchEvent(
-      new CustomEvent("ds:auth-changed", {
-        detail: { user: user || null }
-      })
-    );
+  // --------------------------------------------
+  // SHOW / HIDE MODAL
+  // --------------------------------------------
+
+  function hideAllForms() {
+    Object.values(forms).forEach((form) => {
+      if (form) form.hidden = true;
+    });
   }
 
-  // =========================
-  // REGISTER / SIGNUP
-  // =========================
+  function openAuth(type = "login") {
+    if (!modalOverlay) {
+      console.error("Auth modal #authModal nahi mila.");
+      return;
+    }
 
-  const signupForm = $("#signupForm");
+    const selectedForm = forms[type];
 
-  signupForm?.addEventListener("submit", async (event) => {
+    if (!selectedForm) {
+      console.error("Auth form nahi mila:", type);
+      return;
+    }
+
+    hideAllForms();
+    clearMessage();
+
+    selectedForm.hidden = false;
+    modalOverlay.hidden = false;
+    modalOverlay.style.display = "flex";
+
+    document.body.style.overflow = "hidden";
+
+    const titles = {
+      signup: [
+        "Create Your Account",
+        "Register with your email to get started."
+      ],
+      otp: [
+        "Verify Your Email",
+        "Enter the verification code sent to your email."
+      ],
+      login: [
+        "Welcome Back",
+        "Login to your Digital Services account."
+      ],
+      forgot: [
+        "Recover Password",
+        "We will send password recovery instructions."
+      ],
+      reset: [
+        "Set New Password",
+        "Choose a new password for your account."
+      ]
+    };
+
+    const title = $("#modalTitle");
+    const description = $("#modalDescription");
+
+    if (title) title.textContent = titles[type][0];
+
+    if (description) {
+      description.textContent = titles[type][1];
+    }
+
+    const firstInput = selectedForm.querySelector(
+      'input:not([type="hidden"]):not([readonly])'
+    );
+
+    setTimeout(() => firstInput?.focus(), 50);
+  }
+
+  function closeAuth() {
+    if (!modalOverlay) return;
+
+    modalOverlay.hidden = true;
+    modalOverlay.style.display = "none";
+    document.body.style.overflow = "";
+
+    clearMessage();
+  }
+
+  // Make functions available to other app scripts.
+  window.openDigitalServicesAuth = openAuth;
+  window.closeDigitalServicesAuth = closeAuth;
+  window.showAuthForm = openAuth;
+
+  // --------------------------------------------
+  // OPEN MODAL BUTTONS
+  // --------------------------------------------
+
+  $("#navLogin")?.addEventListener("click", () => {
+    openAuth("login");
+  });
+
+  $("#navRegister")?.addEventListener("click", () => {
+    openAuth("signup");
+  });
+
+  $("#heroRegister")?.addEventListener("click", () => {
+    openAuth("signup");
+  });
+
+  $("#bottomRegister")?.addEventListener("click", () => {
+    openAuth("signup");
+  });
+
+  // --------------------------------------------
+  // SWITCH BETWEEN FORMS
+  // --------------------------------------------
+
+  $("#showLogin")?.addEventListener("click", () => {
+    openAuth("login");
+  });
+
+  $("#showSignup")?.addEventListener("click", () => {
+    openAuth("signup");
+  });
+
+  $("#showForgot")?.addEventListener("click", () => {
+    openAuth("forgot");
+  });
+
+  $("#backToLogin")?.addEventListener("click", () => {
+    openAuth("login");
+  });
+
+  $("#closeModal")?.addEventListener("click", closeAuth);
+
+  modalOverlay?.addEventListener("click", (event) => {
+    if (event.target === modalOverlay) {
+      closeAuth();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && modalOverlay && !modalOverlay.hidden) {
+      closeAuth();
+    }
+  });
+
+  // --------------------------------------------
+  // MOBILE NAVIGATION
+  // --------------------------------------------
+
+  const menuToggle = $("#menuToggle");
+  const navigation = $("#navigation");
+
+  menuToggle?.addEventListener("click", () => {
+    const expanded =
+      menuToggle.getAttribute("aria-expanded") === "true";
+
+    menuToggle.setAttribute("aria-expanded", String(!expanded));
+
+    navigation?.classList.toggle("open", !expanded);
+  });
+
+  navigation?.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => {
+      navigation.classList.remove("open");
+      menuToggle?.setAttribute("aria-expanded", "false");
+    });
+  });
+
+  // --------------------------------------------
+  // SIGNUP
+  // --------------------------------------------
+
+  forms.signup?.addEventListener("submit", async (event) => {
     event.preventDefault();
+    clearMessage();
 
-    const nameInput =
-      $("#signupUsername") ||
-      signupForm.querySelector('[name="username"]');
+    const username = $("#signupUsername")?.value.trim() || "";
+    const email = $("#signupEmail")?.value.trim() || "";
+    const password = $("#signupPassword")?.value || "";
 
-    const emailInput =
-      $("#signupEmail") ||
-      signupForm.querySelector('[name="email"]');
+    // Tumhare HTML mein ID signupConfirmPassword hai.
+    const confirmPassword =
+      $("#signupConfirmPassword")?.value ||
+      $("#confirmPassword")?.value ||
+      "";
 
-    const passwordInput =
-      $("#signupPassword") ||
-      signupForm.querySelector('[name="password"]');
-
-    const confirmInput =
-      $("#confirmPassword") ||
-      signupForm.querySelector('[name="confirmPassword"]');
-
-    const messageElement =
-      $("#signupMessage") ||
-      $("#authMessage");
-
-    const button = signupForm.querySelector(
+    const button = forms.signup.querySelector(
       'button[type="submit"]'
     );
 
-    const name = nameInput?.value.trim() || "";
-    const email = emailInput?.value.trim() || "";
-    const password = passwordInput?.value || "";
-    const confirmPassword = confirmInput?.value || "";
-
-    if (!email || !password) {
-      showMessage(
-        messageElement,
-        "Email aur password dono bharo.",
-        true
-      );
+    if (username.length < 3) {
+      showMessage("Username kam se kam 3 characters ka rakho.", true);
       return;
     }
 
-    if (confirmInput && password !== confirmPassword) {
-      showMessage(
-        messageElement,
-        "Password aur confirm password match nahi kar rahe.",
-        true
-      );
+    if (!email || !password || !confirmPassword) {
+      showMessage("Saare fields fill karo.", true);
       return;
     }
 
-    if (password.length < 6) {
-      showMessage(
-        messageElement,
-        "Password kam se kam 6 characters ka hona chahiye.",
-        true
-      );
+    if (password.length < 8) {
+      showMessage("Password kam se kam 8 characters ka hona chahiye.", true);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      showMessage("Dono passwords match nahi kar rahe.", true);
       return;
     }
 
     const originalText = button?.textContent || "Create Account";
 
     setLoading(button, true, originalText);
-    showMessage(messageElement, "Account create ho raha hai...");
+    showMessage("Account create ho raha hai...");
 
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -144,7 +316,7 @@
         password,
         options: {
           data: {
-            username: name
+            username: username
           },
           emailRedirectTo: window.location.origin + "/"
         }
@@ -152,83 +324,177 @@
 
       if (error) throw error;
 
+      pendingSignup = {
+        email,
+        password
+      };
+
+      const otpEmail = $("#otpEmail");
+
+      if (otpEmail) {
+        otpEmail.value = email;
+      }
+
+      /*
+       * Agar Supabase ne session return kiya,
+       * account create ho gaya aur user login hai.
+       */
       if (data.session) {
-        showMessage(
-          messageElement,
-          "Account ban gaya! Tum login ho chuke ho."
+        showMessage("Account create ho gaya! Welcome.");
+
+        window.dispatchEvent(
+          new CustomEvent("ds:auth-changed", {
+            detail: { user: data.user }
+          })
         );
 
-        notifyAuthChanged(data.user);
-
         setTimeout(() => {
-          window.location.href =
-            window.location.origin + "/pages/dashboard.html";
-        }, 1000);
+          closeAuth();
+          showDashboard(data.user);
+        }, 700);
 
         return;
       }
 
+      /*
+       * Session nahi mila to Supabase email confirmation
+       * required ho sakta hai.
+       *
+       * Default confirmation-link template ke liye
+       * OTP form dikhane ke bajaye email link use karo.
+       */
+      hideAllForms();
+
       showMessage(
-        messageElement,
-        "Account request submit ho gayi! Apna email inbox check karo aur confirmation link par click karo. Uske baad Login page se login karna."
+        "Signup request submit ho gayi! Apna email inbox check karo aur Supabase ka confirmation link click karo. Confirmation ke baad Login karo."
       );
 
-      signupForm.reset();
+      forms.signup.reset();
 
     } catch (error) {
       console.error("Signup error:", error);
-
-      showMessage(
-        messageElement,
-        friendlyError(error),
-        true
-      );
+      showMessage(friendlyError(error), true);
     } finally {
       setLoading(button, false, originalText);
     }
   });
 
-  // =========================
-  // LOGIN
-  // =========================
+  // --------------------------------------------
+  // OTP VERIFICATION
+  // --------------------------------------------
+  /*
+   * Ye handler tabhi kaam karega jab Supabase email
+   * template actual OTP bhej raha ho.
+   *
+   * Default confirmation-link template mein link click
+   * karna hai, OTP enter karna nahi.
+   */
 
-  const loginForm = $("#loginForm");
-
-  loginForm?.addEventListener("submit", async (event) => {
+  forms.otp?.addEventListener("submit", async (event) => {
     event.preventDefault();
+    clearMessage();
 
-    const emailInput =
-      $("#loginEmail") ||
-      loginForm.querySelector('[name="email"]');
+    const email = $("#otpEmail")?.value.trim() || "";
+    const token = $("#otpCode")?.value.trim() || "";
 
-    const passwordInput =
-      $("#loginPassword") ||
-      loginForm.querySelector('[name="password"]');
-
-    const messageElement =
-      $("#loginMessage") ||
-      $("#authMessage");
-
-    const button = loginForm.querySelector(
-      'button[type="submit"]'
-    );
-
-    const email = emailInput?.value.trim() || "";
-    const password = passwordInput?.value || "";
-
-    if (!email || !password) {
-      showMessage(
-        messageElement,
-        "Email aur password bharo.",
-        true
-      );
+    if (!email || !/^\d{6,8}$/.test(token)) {
+      showMessage("Email aur valid verification code enter karo.", true);
       return;
     }
 
-    const originalText = button?.textContent || "Login";
+    const button = forms.otp.querySelector('button[type="submit"]');
+    const originalText = button?.textContent || "Verify Email";
 
     setLoading(button, true, originalText);
-    showMessage(messageElement, "Login ho raha hai...");
+    showMessage("Email verify ho raha hai...");
+
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type: "signup"
+      });
+
+      if (error) throw error;
+
+      showMessage("Email verify ho gaya!");
+
+      if (data.user) {
+        window.dispatchEvent(
+          new CustomEvent("ds:auth-changed", {
+            detail: { user: data.user }
+          })
+        );
+      }
+
+      setTimeout(() => {
+        openAuth("login");
+        showMessage("Email verify ho gaya. Ab login karo.");
+      }, 800);
+
+    } catch (error) {
+      console.error("OTP verification error:", error);
+      showMessage(friendlyError(error), true);
+    } finally {
+      setLoading(button, false, originalText);
+    }
+  });
+
+  // --------------------------------------------
+  // RESEND OTP
+  // --------------------------------------------
+
+  $("#resendOtp")?.addEventListener("click", async () => {
+    clearMessage();
+
+    const email = $("#otpEmail")?.value.trim() || "";
+
+    if (!email) {
+      showMessage("Pehle signup email enter karo.", true);
+      return;
+    }
+
+    showMessage("Request process ho rahi hai...");
+
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email
+      });
+
+      if (error) throw error;
+
+      showMessage(
+        "Agar email confirmation configured hai, toh inbox check karo."
+      );
+
+    } catch (error) {
+      console.error("Resend error:", error);
+      showMessage(friendlyError(error), true);
+    }
+  });
+
+  // --------------------------------------------
+  // LOGIN
+  // --------------------------------------------
+
+  forms.login?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    clearMessage();
+
+    const email = $("#loginEmail")?.value.trim() || "";
+    const password = $("#loginPassword")?.value || "";
+
+    const button = forms.login.querySelector('button[type="submit"]');
+    const originalText = button?.textContent || "Login";
+
+    if (!email || !password) {
+      showMessage("Email aur password enter karo.", true);
+      return;
+    }
+
+    setLoading(button, true, originalText);
+    showMessage("Login ho raha hai...");
 
     try {
       const { data, error } =
@@ -239,168 +505,196 @@
 
       if (error) throw error;
 
-      showMessage(messageElement, "Login successful!");
+      showMessage("Login successful!");
 
-      notifyAuthChanged(data.user);
+      window.dispatchEvent(
+        new CustomEvent("ds:auth-changed", {
+          detail: { user: data.user }
+        })
+      );
 
       setTimeout(() => {
-        window.location.href =
-          window.location.origin + "/pages/dashboard.html";
-      }, 700);
+        closeAuth();
+        showDashboard(data.user);
+      }, 500);
 
     } catch (error) {
       console.error("Login error:", error);
-
-      showMessage(
-        messageElement,
-        friendlyError(error),
-        true
-      );
+      showMessage(friendlyError(error), true);
     } finally {
       setLoading(button, false, originalText);
     }
   });
 
-  // =========================
-  // LOGOUT
-  // =========================
+  // --------------------------------------------
+  // FORGOT PASSWORD
+  // --------------------------------------------
 
-  $("#logoutButton")?.addEventListener("click", async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-
-      if (error) throw error;
-
-      notifyAuthChanged(null);
-
-      window.location.href = window.location.origin + "/";
-
-    } catch (error) {
-      console.error("Logout error:", error);
-      alert(friendlyError(error));
-    }
-  });
-
-  // =========================
-  // PASSWORD RECOVERY
-  // =========================
-
-  const forgotForm = $("#forgotForm");
-
-  forgotForm?.addEventListener("submit", async (event) => {
+  forms.forgot?.addEventListener("submit", async (event) => {
     event.preventDefault();
+    clearMessage();
 
-    const emailInput =
-      $("#forgotEmail") ||
-      forgotForm.querySelector('[name="email"]');
-
-    const messageElement =
-      $("#forgotMessage") ||
-      $("#authMessage");
-
-    const email = emailInput?.value.trim() || "";
+    const email = $("#forgotEmail")?.value.trim() || "";
+    const button = forms.forgot.querySelector('button[type="submit"]');
+    const originalText = button?.textContent || "Send Recovery Link";
 
     if (!email) {
-      showMessage(
-        messageElement,
-        "Apna email address bharo.",
-        true
-      );
+      showMessage("Apna email address enter karo.", true);
       return;
     }
+
+    setLoading(button, true, originalText);
+    showMessage("Recovery email send ho rahi hai...");
 
     try {
-      const { error } =
-        await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin + "/"
-        });
-
-      if (error) throw error;
-
-      showMessage(
-        messageElement,
-        "Agar is email se account hai, toh password recovery instructions email par bhej di gayi hain."
-      );
-
-    } catch (error) {
-      console.error("Password recovery error:", error);
-
-      showMessage(
-        messageElement,
-        friendlyError(error),
-        true
-      );
-    }
-  });
-
-  // =========================
-  // UPDATE PASSWORD
-  // =========================
-
-  const resetForm = $("#resetForm");
-
-  resetForm?.addEventListener("submit", async (event) => {
-    event.preventDefault();
-
-    const passwordInput =
-      $("#resetPassword") ||
-      resetForm.querySelector('[name="password"]');
-
-    const confirmInput =
-      $("#resetConfirmPassword") ||
-      resetForm.querySelector('[name="confirmPassword"]');
-
-    const messageElement =
-      $("#resetMessage") ||
-      $("#authMessage");
-
-    const password = passwordInput?.value || "";
-    const confirmPassword = confirmInput?.value || "";
-
-    if (password.length < 6) {
-      showMessage(
-        messageElement,
-        "Password kam se kam 6 characters ka hona chahiye.",
-        true
-      );
-      return;
-    }
-
-    if (confirmInput && password !== confirmPassword) {
-      showMessage(
-        messageElement,
-        "Dono passwords match nahi kar rahe.",
-        true
-      );
-      return;
-    }
-
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + "/"
       });
 
       if (error) throw error;
 
       showMessage(
-        messageElement,
-        "Password update ho gaya. Ab login kar sakte ho."
+        "Agar is email se account hai, toh recovery instructions email par bhej di gayi hain."
       );
 
     } catch (error) {
-      console.error("Password update error:", error);
-
-      showMessage(
-        messageElement,
-        friendlyError(error),
-        true
-      );
+      console.error("Recovery error:", error);
+      showMessage(friendlyError(error), true);
+    } finally {
+      setLoading(button, false, originalText);
     }
   });
 
-  // =========================
-  // GLOBAL AUTH HELPERS
-  // =========================
+  // --------------------------------------------
+  // RESET PASSWORD
+  // --------------------------------------------
+
+  forms.reset?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    clearMessage();
+
+    const password = $("#resetPassword")?.value || "";
+    const confirmPassword =
+      $("#resetConfirmPassword")?.value || "";
+
+    const button = forms.reset.querySelector('button[type="submit"]');
+    const originalText = button?.textContent || "Update Password";
+
+    if (password.length < 8) {
+      showMessage("Password kam se kam 8 characters ka rakho.", true);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      showMessage("Dono passwords match nahi kar rahe.", true);
+      return;
+    }
+
+    setLoading(button, true, originalText);
+    showMessage("Password update ho raha hai...");
+
+    try {
+      const { data, error } = await supabase.auth.updateUser({
+        password
+      });
+
+      if (error) throw error;
+
+      showMessage("Password update ho gaya. Ab naye password se login karo.");
+
+      forms.reset.reset();
+
+      setTimeout(() => {
+        openAuth("login");
+      }, 1000);
+
+    } catch (error) {
+      console.error("Reset password error:", error);
+      showMessage(friendlyError(error), true);
+    } finally {
+      setLoading(button, false, originalText);
+    }
+  });
+
+  // --------------------------------------------
+  // SHOW DASHBOARD AFTER LOGIN
+  // --------------------------------------------
+
+  function showDashboard(user) {
+    const dashboard = $("#userDashboard");
+
+    if (!dashboard) {
+      // Agar is page par dashboard section nahi hai,
+      // toh login successful rehne do.
+      return;
+    }
+
+    const username =
+      user?.user_metadata?.username ||
+      user?.email?.split("@")[0] ||
+      "User";
+
+    const usernameElement = $("#dashboardUsername");
+    const emailElement = $("#dashboardEmail");
+
+    if (usernameElement) {
+      usernameElement.textContent = username;
+    }
+
+    if (emailElement) {
+      emailElement.textContent = user?.email || "";
+    }
+
+    dashboard.hidden = false;
+
+    dashboard.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  }
+
+  // --------------------------------------------
+  // LOGOUT
+  // --------------------------------------------
+
+  async function logout() {
+    try {
+      const { error } = await supabase.auth.signOut();
+
+      if (error) throw error;
+
+      window.dispatchEvent(
+        new CustomEvent("ds:auth-changed", {
+          detail: { user: null }
+        })
+      );
+
+      closeAuth();
+
+      const dashboard = $("#userDashboard");
+
+      if (dashboard) {
+        dashboard.hidden = true;
+      }
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+
+      showMessage("Logout successful.");
+
+    } catch (error) {
+      console.error("Logout error:", error);
+      alert(friendlyError(error));
+    }
+  }
+
+  $("#logoutButton")?.addEventListener("click", logout);
+
+  // --------------------------------------------
+  // GLOBAL HELPERS
+  // --------------------------------------------
 
   window.DigitalServicesAuth = {
     getUser: async () => {
@@ -416,22 +710,41 @@
 
       if (error) throw error;
 
-      notifyAuthChanged(null);
+      window.dispatchEvent(
+        new CustomEvent("ds:auth-changed", {
+          detail: { user: null }
+        })
+      );
     }
   };
 
-  // Handle password recovery links and restored sessions
+  // --------------------------------------------
+  // AUTH STATE
+  // --------------------------------------------
+
   supabase.auth.onAuthStateChange((event, session) => {
-    if (event === "PASSWORD_RECOVERY") {
-      if (typeof window.showAuthForm === "function") {
-        window.openDigitalServicesAuth?.("reset");
-      }
+    if (event === "SIGNED_IN" && session?.user) {
+      window.dispatchEvent(
+        new CustomEvent("ds:auth-changed", {
+          detail: { user: session.user }
+        })
+      );
     }
 
-    if (event === "SIGNED_IN" && session?.user) {
-      notifyAuthChanged(session.user);
+    if (event === "PASSWORD_RECOVERY") {
+      openAuth("reset");
     }
   });
+
+  // --------------------------------------------
+  // CURRENT YEAR
+  // --------------------------------------------
+
+  const yearElement = $("#year");
+
+  if (yearElement) {
+    yearElement.textContent = new Date().getFullYear();
+  }
 
   console.log("Digital Services authentication initialized.");
 })();
