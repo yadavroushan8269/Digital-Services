@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>My Orders | Digital Services</title>
+
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase.js" defer></script>
+  <script src="../js/auth.js" defer></script>
+  <script src="../js/orders.js" defer></script>
+  <script src="../js/app.js" defer></script>
+</head>
+
+<body>
+
+  <header class="header">
+    <nav class="navbar">
+      <a href="../index.html" class="logo">Digital Services</a>
+
+      <div class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="services.html">Services</a>
+        <a href="wallet.html">Wallet</a>
+        <a href="profile.html">Profile</a>
+        <a href="support.html">Support</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="dashboard-container">
+
+    <section class="dashboard-heading">
+      <h1>My Orders</h1>
+      <p>View your orders and check their current status.</p>
+    </section>
+
+    <section class="dashboard-section">
+
+      <h2>Order History</h2>
+
+      <div class="table-responsive">
+        <table class="data-table">
+
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Service</th>
+              <th>Quantity</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Order Date</th>
+            </tr>
+          </thead>
+
+          <tbody id="ordersTableBody">
+            <tr>
+              <td colspan="6">Loading your orders...</td>
+            </tr>
+          </tbody>
+
+        </table>
+      </div>
+
+      <p id="ordersMessage" role="status" aria-live="polite"></p>
+
+    </section>
+
+    <section class="dashboard-section">
+      <h2>Need a Service?</h2>
+      <p>Explore the available services and find the right option for you.</p>
+
+      <a href="services.html" class="btn btn-primary">
+        Browse Services
+      </a>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>
+      &copy; <span id="year"></span> Digital Services.
+      All rights reserved.
+    </p>
+  </footer>
+
+</body>
+</html>
