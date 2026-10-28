@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Dashboard | Digital Services</title>
+
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase.js" defer></script>
+  <script src="../js/auth.js" defer></script>
+  <script src="../js/dashboard.js" defer></script>
+  <script src="../js/app.js" defer></script>
+</head>
+
+<body>
+
+  <header class="header">
+    <nav class="navbar">
+      <a href="../index.html" class="logo">Digital Services</a>
+
+      <div class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="services.html">Services</a>
+        <a href="orders.html">My Orders</a>
+        <a href="wallet.html">Wallet</a>
+        <a href="profile.html">Profile</a>
+        <button type="button" id="logoutButton" class="btn btn-primary">
+          Logout
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="dashboard-container">
+
+    <section class="dashboard-heading">
+      <h1>My Dashboard</h1>
+      <p>Welcome to your Digital Services account.</p>
+    </section>
+
+    <section class="dashboard-stats">
+
+      <article class="stat-card">
+        <h2>Total Orders</h2>
+        <p id="totalOrders">0</p>
+      </article>
+
+      <article class="stat-card">
+        <h2>Pending Orders</h2>
+        <p id="pendingOrders">0</p>
+      </article>
+
+      <article class="stat-card">
+        <h2>Completed Orders</h2>
+        <p id="completedOrders">0</p>
+      </article>
+
+      <article class="stat-card">
+        <h2>Wallet Balance</h2>
+        <p id="walletBalance">₹0.00</p>
+      </article>
+
+    </section>
+
+    <section class="dashboard-section">
+      <h2>Quick Actions</h2>
+
+      <div class="dashboard-actions">
+        <a href="services.html" class="btn btn-primary">
+          Browse Services
+        </a>
+
+        <a href="orders.html" class="btn btn-primary">
+          View My Orders
+        </a>
+
+        <a href="wallet.html" class="btn btn-primary">
+          My Wallet
+        </a>
+
+        <a href="profile.html" class="btn btn-primary">
+          My Profile
+        </a>
+      </div>
+    </section>
+
+    <section class="dashboard-section">
+      <h2>Recent Orders</h2>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Service</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+
+          <tbody id="recentOrders">
+            <tr>
+              <td colspan="5">Orders will appear here.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+    <p id="dashboardMessage" role="status" aria-live="polite"></p>
+
+  </main>
+
+  <footer class="footer">
+    <p>
+      &copy; <span id="year"></span> Digital Services.
+      All rights reserved.
+    </p>
+  </footer>
+
+</body>
+</html>
