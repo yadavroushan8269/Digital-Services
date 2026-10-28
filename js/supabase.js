@@ -1,41 +1,59 @@
 "use strict";
 
 (function () {
-    // Apne Supabase project ki details yahan daalo.
-    const SUPABASE_URL =
-        "https://https://qzkqkfmueejeyjjdqfts.supabase.co/rest/v1/";
+    // ===================================
+    // SUPABASE CONFIGURATION
+    // ===================================
 
-    const SUPABASE_KEY =
-        "sb_publishable_Ua7940LgyOi8a7g7zTFzdg_xLojVla_";
+    const SUPABASE_URL = "https://qzkqkfmueejeyjjdqfts.supabase.co/rest/v1/";
+    const SUPABASE_KEY = "sb_publishable_Ua7940LgyOi8a7g7zTFzdg_xLojVla_";
 
-    // Check whether Supabase library loaded.
+    // ===================================
+    // CHECK SUPABASE LIBRARY
+    // ===================================
+
     if (!window.supabase || !window.supabase.createClient) {
-        console.error(
-            "Supabase library load nahi hui. CDN check karo."
-        );
+        console.error("Supabase library load nahi hui.");
         return;
     }
 
-    // Check configuration.
+    // ===================================
+    // CHECK CONFIGURATION
+    // ===================================
+
     if (
-        SUPABASE_URL.includes("https://qzkqkfmueejeyjjdqfts.supabase.co/rest/v1/") ||
-        SUPABASE_KEY.includes("sb_publishable_Ua7940LgyOi8a7g7zTFzdg_xLojVla_")
+        !SUPABASE_URL.startsWith("https://") ||
+        !SUPABASE_URL.endsWith(".supabase.co") ||
+        SUPABASE_KEY.startsWith("PASTE_")
     ) {
         console.error(
-            "Supabase URL aur publishable key abhi set nahi ki gayi."
+            "Supabase URL ya Publishable Key sahi se configure nahi hai."
         );
         return;
     }
+
+    // ===================================
+    // CREATE SUPABASE CLIENT
+    // ===================================
 
     try {
         window.digitalServicesSupabase =
             window.supabase.createClient(
                 SUPABASE_URL,
-                SUPABASE_KEY
+                SUPABASE_KEY,
+                {
+                    auth: {
+                        autoRefreshToken: true,
+                        persistSession: true,
+                        detectSessionInUrl: true,
+                        flowType: "pkce"
+                    }
+                }
             );
 
-        console.log("Supabase client successfully initialized!");
+        console.log("Supabase client initialized successfully.");
+
     } catch (error) {
-        console.error("Supabase initialization failed:", error);
+        console.error("Supabase initialization error:", error);
     }
 })();
