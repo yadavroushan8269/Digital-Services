@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Support | Digital Services</title>
+
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase.js" defer></script>
+  <script src="../js/auth.js" defer></script>
+  <script src="../js/app.js" defer></script>
+</head>
+
+<body>
+
+  <header class="header">
+    <nav class="navbar">
+      <a href="../index.html" class="logo">Digital Services</a>
+
+      <div class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="services.html">Services</a>
+        <a href="order.html">My Orders</a>
+        <a href="wallet.html">Wallet</a>
+        <a href="profile.html">Profile</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="dashboard-container">
+
+    <section class="dashboard-heading">
+      <h1>Customer Support</h1>
+      <p>Need help? Send us your question and our team can assist you.</p>
+    </section>
+
+    <section class="auth-container">
+
+      <div class="auth-card">
+
+        <h2>Contact Support</h2>
+
+        <form id="supportForm">
+
+          <div class="form-group">
+            <label for="supportName">Your Name</label>
+
+            <input
+              type="text"
+              id="supportName"
+              name="name"
+              placeholder="Enter your name"
+              autocomplete="name"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="supportEmail">Email Address</label>
+
+            <input
+              type="email"
+              id="supportEmail"
+              name="email"
+              placeholder="Enter your email"
+              autocomplete="email"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="supportSubject">Subject</label>
+
+            <input
+              type="text"
+              id="supportSubject"
+              name="subject"
+              placeholder="What do you need help with?"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="supportMessageInput">Your Message</label>
+
+            <textarea
+              id="supportMessageInput"
+              name="message"
+              rows="5"
+              placeholder="Explain your issue here..."
+              required
+            ></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            Send Message
+          </button>
+
+          <p id="supportStatus" role="status" aria-live="polite"></p>
+
+        </form>
+
+      </div>
+
+    </section>
+
+    <section class="dashboard-section">
+      <h2>Common Questions</h2>
+
+      <article class="service-card">
+        <h3>Where can I check my orders?</h3>
+        <p>Visit the My Orders page to check your order history.</p>
+      </article>
+
+      <article class="service-card">
+        <h3>Where can I view my account details?</h3>
+        <p>Open the Profile page to view your account information.</p>
+      </article>
+
+      <article class="service-card">
+        <h3>How can I check my wallet?</h3>
+        <p>Visit the Wallet page to view your wallet information.</p>
+      </article>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>
+      &copy; <span id="year"></span> Digital Services.
+      All rights reserved.
+    </p>
+  </footer>
+
+</body>
+</html>
