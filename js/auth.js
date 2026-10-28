@@ -1,383 +1,219 @@
-/* ==========================================
-   DIGITAL-SERVICES
-   AUTHENTICATION MODULE
-   Register | Email OTP | Login | Logout
-========================================== */
-
-(function () {
+// Digital-Services - Authentication
+(() => {
   "use strict";
 
-  const getSupabase = () =>
-    window.digitalServicesSupabase || null;
+  let pendingEmail = "";
 
-  const getElement = (id) =>
-    document.getElementById(id);
+  const getSupabase = () => window.digitalServicesSupabase;
+  const getElement = (id) => document.getElementById(id);
 
-  function showMessage(message, type = "info") {
-    const box = getElement("authMessage");
+  function showMessage(message, isError = false) {
+    const element = getElement("authMessage");
+    if (!element) return;
 
-    if (!box) {
-      console.log(message);
-      return;
-    }
-
-    box.textContent = message;
-    box.className = "auth-message " + type;
-    box.style.display = "block";
-    box.setAttribute("role", "status");
+    element.textContent = message;
+    element.style.color = isError ? "#dc2626" : "";
   }
 
-  function clearMessage() {
-    const box = getElement("authMessage");
+  function setBusy(form, busy) {
+    if (!form) return;
 
-    if (box) {
-      box.textContent = "";
-      box.className = "auth-message";
-      box.style.display = "none";
-    }
-  }
+    const buttons = form.querySelectorAll(
+      'button[type="submit"], input[type="submit"]'
+    );
 
-  function getInputValue(id) {
-    const input = getElement(id);
-    return input ? input.value.trim() : "";
-  }
-
-  function setButtonLoading(button, loading, originalText) {
-    if (!button) return;
-
-    button.disabled = loading;
-    button.textContent = loading
-      ? "Please wait..."
-      : originalText;
-  }
-
-  function isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    buttons.forEach((button) => {
+      button.disabled = busy;
+    });
   }
 
   function friendlyError(error) {
     const message = String(error?.message || "").toLowerCase();
 
     if (message.includes("invalid login credentials")) {
-      return "Email ya password sahi nahi hai.";
+      return "Email ya password galat hai.";
     }
 
     if (message.includes("email not confirmed")) {
-      return "Pehle apna email verify karo.";
+      return "Pehle apna email OTP se verify karo.";
     }
 
     if (message.includes("already registered")) {
-      return "Ye email pehle se registered hai. Login try karo.";
+      return "Is email se account pehle se bana hua hai. Login try karo.";
     }
 
     if (message.includes("password")) {
-      return "Password requirements check karo.";
+      return error.message || "Password mein problem hai.";
     }
 
-    if (
-      message.includes("rate limit") ||
-      message.includes("too many requests")
-    ) {
-      return "Bahut saari requests ho gayi hain. Thodi der baad try karo.";
-    }
-
-    if (message.includes("network")) {
-      return "Internet connection check karo.";
+    if (message.includes("invalid")) {
+      return "Code ya details galat hain. Dobara check karo.";
     }
 
     return error?.message || "Kuch problem hui. Dobara try karo.";
   }
 
-  /* ------------------------------------------
-     Form Visibility Helpers
-  ------------------------------------------ */
-
-  function hideAllAuthForms() {
-    [
-      "signupForm",
-      "otpForm",
-      "loginForm",
-      "forgotForm",
-      "resetForm"
-    ].forEach((id) => {
-      const form = getElement(id);
-
-      if (form) {
-        form.style.display = "none";
-      }
-    });
-  }
-
-  function showAuthForm(id) {
-    hideAllAuthForms();
-
-    const form = getElement(id);
-
-    if (form) {
-      form.style.display = "block";
-    }
-
-    clearMessage();
-  }
-
-  /* ------------------------------------------
-     Registration
-  ------------------------------------------ */
-
-  async function registerUser(event) {
-    event.preventDefault();
-    clearMessage();
-
+  function requireSupabase() {
     const supabase = getSupabase();
 
     if (!supabase) {
       showMessage(
-        "Supabase connect nahi hua. Configuration check karo.",
-        "error"
+        "Supabase connection nahi ho rahi. Configuration check karo.",
+        true
       );
-      return;
+      return null;
     }
 
-    const username = getInputValue("signupUsername");
-    const email = getInputValue("signupEmail");
-    const password = getInputValue("signupPassword");
-    const confirmPassword = getInputValue("signupConfirmPassword");
+    return supabase;
+  }
 
-    if (!username || !email || !password) {
-      showMessage("Saari required details bharo.", "error");
-      return;
-    }
+  async function signup(event) {
+    event.preventDefault();
 
-    if (!isValidEmail(email)) {
-      showMessage("Valid email address enter karo.", "error");
+    const form = event.currentTarget;
+    const supabase = requireSupabase();
+    if (!supabase) return;
+
+    const username = getElement("signupUsername")?.value.trim();
+    const email = getElement("signupEmail")?.value.trim().toLowerCase();
+    const password = getElement("signupPassword")?.value;
+    const confirmPassword =
+      getElement("signupConfirmPassword")?.value;
+
+    if (!username || !email || !password || !confirmPassword) {
+      showMessage("Saari details fill karo.", true);
       return;
     }
 
     if (password.length < 8) {
-      showMessage(
-        "Password kam se kam 8 characters ka rakho.",
-        "error"
-      );
+      showMessage("Password kam se kam 8 characters ka rakho.", true);
       return;
     }
 
     if (password !== confirmPassword) {
-      showMessage("Dono passwords match nahi kar rahe.", "error");
+      showMessage("Dono passwords match nahi kar rahe.", true);
       return;
     }
 
-    const button = event.submitter;
-    const originalText = button?.textContent || "Create Account";
-
-    setButtonLoading(button, true, originalText);
+    setBusy(form, true);
+    showMessage("Account create ho raha hai...");
 
     try {
-      /*
-       * OTP-based registration:
-       * Supabase sends an email OTP.
-       * Email template must contain {{ .Token }}.
-       */
-
-      const { error } = await supabase.auth.signInWithOtp({
+      const { data, error } = await supabase.auth.signUp({
         email,
+        password,
         options: {
-          shouldCreateUser: true,
-          data: {
-            username: username
-          }
+          data: { username }
         }
       });
 
       if (error) throw error;
 
-      // Store only temporary, non-secret registration details.
-      sessionStorage.setItem(
-        "ds_pending_email",
-        email
-      );
+      pendingEmail = email;
 
-      sessionStorage.setItem(
-        "ds_pending_username",
-        username
-      );
+      const otpEmail = getElement("otpEmail");
+      if (otpEmail) otpEmail.value = email;
 
-      // Do not store the password in browser storage.
+      if (data.user && !data.session) {
+        if (typeof window.showAuthForm === "function") {
+          window.showAuthForm("otp");
+        }
 
-      const emailField = getElement("otpEmail");
-
-      if (emailField) {
-        emailField.value = email;
-      }
-
-      showAuthForm("otpForm");
-
-      showMessage(
-        "Email par OTP bhej diya gaya hai. Inbox aur spam folder check karo.",
-        "success"
-      );
-    } catch (error) {
-      showMessage(friendlyError(error), "error");
-    } finally {
-      setButtonLoading(button, false, originalText);
-    }
-  }
-
-  /* ------------------------------------------
-     Verify Registration OTP
-  ------------------------------------------ */
-
-  async function verifyRegistrationOtp(event) {
-    event.preventDefault();
-    clearMessage();
-
-    const supabase = getSupabase();
-
-    if (!supabase) {
-      showMessage("Supabase connection missing hai.", "error");
-      return;
-    }
-
-    const email =
-      getInputValue("otpEmail") ||
-      sessionStorage.getItem("ds_pending_email") ||
-      "";
-
-    const token = getInputValue("otpCode");
-
-    if (!isValidEmail(email)) {
-      showMessage("Registration email nahi mila.", "error");
-      return;
-    }
-
-    if (!/^\d{6}$/.test(token)) {
-      showMessage("6-digit OTP enter karo.", "error");
-      return;
-    }
-
-    const button = event.submitter;
-    const originalText = button?.textContent || "Verify OTP";
-
-    setButtonLoading(button, true, originalText);
-
-    try {
-      const { data, error } = await supabase.auth.verifyOtp({
-        email,
-        token,
-        type: "email"
-      });
-
-      if (error) throw error;
-
-      sessionStorage.removeItem("ds_pending_email");
-      sessionStorage.removeItem("ds_pending_username");
-
-      showMessage(
-        "Email verify ho gaya! Account ready hai.",
-        "success"
-      );
-
-      /*
-       * Successful email OTP verification may also sign
-       * the user in. Update dashboard if available.
-       */
-
-      if (data?.session) {
-        window.dispatchEvent(
-          new CustomEvent("ds:auth-changed", {
-            detail: { user: data.user }
-          })
+        showMessage(
+          "Email par verification code bheja gaya hai. Inbox ya spam folder check karo."
+        );
+      } else if (data.session) {
+        showMessage(
+          "Account create ho gaya! Ab login kar sakte ho."
         );
 
-        if (typeof window.refreshDashboard === "function") {
-          await window.refreshDashboard();
+        await supabase.auth.signOut();
+        if (typeof window.showAuthForm === "function") {
+          window.showAuthForm("login");
         }
       } else {
-        showAuthForm("loginForm");
         showMessage(
-          "Email verify ho gaya. Ab login karo.",
-          "success"
+          "Account status confirm nahi ho saka. Dobara try karo.",
+          true
         );
       }
     } catch (error) {
-      showMessage(
-        friendlyError(error),
-        "error"
-      );
+      showMessage(friendlyError(error), true);
     } finally {
-      setButtonLoading(button, false, originalText);
+      setBusy(form, false);
     }
   }
 
-  /* ------------------------------------------
-     Resend Registration OTP
-  ------------------------------------------ */
+  async function verifyOtp(event) {
+    event.preventDefault();
 
-  async function resendOtp() {
-    clearMessage();
-
-    const supabase = getSupabase();
-
-    if (!supabase) {
-      showMessage("Supabase connection missing hai.", "error");
-      return;
-    }
+    const form = event.currentTarget;
+    const supabase = requireSupabase();
+    if (!supabase) return;
 
     const email =
-      getInputValue("otpEmail") ||
-      sessionStorage.getItem("ds_pending_email") ||
-      "";
+      getElement("otpEmail")?.value.trim().toLowerCase() ||
+      pendingEmail;
 
-    if (!isValidEmail(email)) {
-      showMessage("Valid email address nahi mila.", "error");
+    const token = getElement("otpCode")?.value.trim();
+
+    if (!email || !token) {
+      showMessage("Email aur OTP code enter karo.", true);
       return;
     }
 
+    setBusy(form, true);
+    showMessage("OTP verify ho raha hai...");
+
     try {
-      const { error } = await supabase.auth.signInWithOtp({
+      const { error } = await supabase.auth.verifyOtp({
         email,
-        options: {
-          shouldCreateUser: false
-        }
+        token,
+        type: "signup"
       });
 
       if (error) throw error;
 
+      // Verification ke baad session close karke normal login dikhate hain.
+      await supabase.auth.signOut();
+
+      const otpCode = getElement("otpCode");
+      if (otpCode) otpCode.value = "";
+
+      if (typeof window.showAuthForm === "function") {
+        window.showAuthForm("login");
+      }
+
+      const loginEmail = getElement("loginEmail");
+      if (loginEmail) loginEmail.value = email;
+
       showMessage(
-        "Agar account registered hai, naya OTP bhej diya gaya hai.",
-        "success"
+        "Email verify ho gaya! Ab apne email aur password se login karo."
       );
     } catch (error) {
-      showMessage(friendlyError(error), "error");
+      showMessage(friendlyError(error), true);
+    } finally {
+      setBusy(form, false);
     }
   }
 
-  /* ------------------------------------------
-     Login with Email and Password
-  ------------------------------------------ */
-
-  async function loginUser(event) {
+  async function login(event) {
     event.preventDefault();
-    clearMessage();
 
-    const supabase = getSupabase();
+    const form = event.currentTarget;
+    const supabase = requireSupabase();
+    if (!supabase) return;
 
-    if (!supabase) {
-      showMessage("Supabase connection missing hai.", "error");
+    const email = getElement("loginEmail")?.value.trim().toLowerCase();
+    const password = getElement("loginPassword")?.value;
+
+    if (!email || !password) {
+      showMessage("Email aur password enter karo.", true);
       return;
     }
 
-    const email = getInputValue("loginEmail");
-    const password = getInputValue("loginPassword");
-
-    if (!isValidEmail(email) || !password) {
-      showMessage("Email aur password check karo.", "error");
-      return;
-    }
-
-    const button = event.submitter;
-    const originalText = button?.textContent || "Login";
-
-    setButtonLoading(button, true, originalText);
+    setBusy(form, true);
+    showMessage("Login ho raha hai...");
 
     try {
       const { data, error } =
@@ -388,7 +224,7 @@
 
       if (error) throw error;
 
-      showMessage("Login successful!", "success");
+      showMessage("Login successful!");
 
       window.dispatchEvent(
         new CustomEvent("ds:auth-changed", {
@@ -396,260 +232,171 @@
         })
       );
 
-      if (typeof window.refreshDashboard === "function") {
-        await window.refreshDashboard();
+      const modal = getElement("authModal");
+      if (modal) modal.hidden = true;
+
+      if (
+        typeof window.DigitalServicesDashboard?.refresh === "function"
+      ) {
+        await window.DigitalServicesDashboard.refresh();
       }
     } catch (error) {
-      showMessage(friendlyError(error), "error");
+      showMessage(friendlyError(error), true);
     } finally {
-      setButtonLoading(button, false, originalText);
+      setBusy(form, false);
     }
   }
 
-  /* ------------------------------------------
-     Forgot Password
-  ------------------------------------------ */
+  async function resendOtp() {
+    const supabase = requireSupabase();
+    if (!supabase) return;
 
-  async function sendPasswordReset(event) {
-    event.preventDefault();
-    clearMessage();
+    const email =
+      getElement("otpEmail")?.value.trim().toLowerCase() ||
+      pendingEmail;
 
-    const supabase = getSupabase();
-
-    if (!supabase) {
-      showMessage("Supabase connection missing hai.", "error");
+    if (!email) {
+      showMessage("Pehle apna email enter karo.", true);
       return;
     }
 
-    const email = getInputValue("forgotEmail");
-
-    if (!isValidEmail(email)) {
-      showMessage("Valid email address enter karo.", "error");
-      return;
-    }
-
-    const button = event.submitter;
-    const originalText =
-      button?.textContent || "Send Reset Link";
-
-    setButtonLoading(button, true, originalText);
+    showMessage("Naya OTP bheja ja raha hai...");
 
     try {
-      const redirectTo = new URL(
-        window.location.pathname,
-        window.location.origin
-      ).href;
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email
+      });
 
-      const { error } =
-        await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo
-        });
+      if (error) throw error;
+
+      showMessage("Naya OTP bhej diya gaya hai. Email check karo.");
+    } catch (error) {
+      showMessage(friendlyError(error), true);
+    }
+  }
+
+  async function forgotPassword(event) {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+    const supabase = requireSupabase();
+    if (!supabase) return;
+
+    const email = getElement("forgotEmail")?.value.trim().toLowerCase();
+
+    if (!email) {
+      showMessage("Apna registered email enter karo.", true);
+      return;
+    }
+
+    setBusy(form, true);
+    showMessage("Recovery email bheja ja raha hai...");
+
+    try {
+      const redirectTo = `${window.location.origin}${window.location.pathname}`;
+
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        email,
+        { redirectTo }
+      );
 
       if (error) throw error;
 
       showMessage(
-        "Agar is email ka account hai, password reset instructions bhej di gayi hain.",
-        "success"
+        "Agar is email par account hai, toh password reset link bhej diya gaya hai. Email check karo."
       );
     } catch (error) {
-      showMessage(friendlyError(error), "error");
+      showMessage(friendlyError(error), true);
     } finally {
-      setButtonLoading(button, false, originalText);
+      setBusy(form, false);
     }
   }
 
-  /* ------------------------------------------
-     Update Password
-  ------------------------------------------ */
-
-  async function updatePassword(event) {
+  async function resetPassword(event) {
     event.preventDefault();
-    clearMessage();
 
-    const supabase = getSupabase();
+    const form = event.currentTarget;
+    const supabase = requireSupabase();
+    if (!supabase) return;
 
-    if (!supabase) {
-      showMessage("Supabase connection missing hai.", "error");
+    const password = getElement("resetPassword")?.value;
+    const confirmPassword =
+      getElement("resetConfirmPassword")?.value;
+
+    if (!password || !confirmPassword) {
+      showMessage("Dono password fields fill karo.", true);
       return;
     }
 
-    const password = getInputValue("resetPassword");
-    const confirmPassword =
-      getInputValue("resetConfirmPassword");
-
     if (password.length < 8) {
-      showMessage(
-        "Password kam se kam 8 characters ka rakho.",
-        "error"
-      );
+      showMessage("Password kam se kam 8 characters ka rakho.", true);
       return;
     }
 
     if (password !== confirmPassword) {
-      showMessage("Dono passwords match nahi kar rahe.", "error");
+      showMessage("Dono passwords match nahi kar rahe.", true);
       return;
     }
 
-    const button = event.submitter;
-    const originalText =
-      button?.textContent || "Update Password";
-
-    setButtonLoading(button, true, originalText);
+    setBusy(form, true);
+    showMessage("Password update ho raha hai...");
 
     try {
-      const { error } = await supabase.auth.updateUser({
-        password
-      });
+      const { error } = await supabase.auth.updateUser({ password });
 
       if (error) throw error;
 
-      showMessage(
-        "Password successfully update ho gaya.",
-        "success"
-      );
+      await supabase.auth.signOut();
+
+      if (typeof window.showAuthForm === "function") {
+        window.showAuthForm("login");
+      }
 
       const resetForm = getElement("resetForm");
+      resetForm?.reset();
 
-      if (resetForm) resetForm.reset();
-
-      showAuthForm("loginForm");
-    } catch (error) {
-      showMessage(friendlyError(error), "error");
-    } finally {
-      setButtonLoading(button, false, originalText);
-    }
-  }
-
-  /* ------------------------------------------
-     Logout
-  ------------------------------------------ */
-
-  async function logoutUser() {
-    const supabase = getSupabase();
-
-    if (!supabase) return;
-
-    try {
-      const { error } = await supabase.auth.signOut();
-
-      if (error) throw error;
-
-      sessionStorage.removeItem("ds_pending_email");
-      sessionStorage.removeItem("ds_pending_username");
-
-      window.dispatchEvent(
-        new CustomEvent("ds:auth-changed", {
-          detail: { user: null }
-        })
+      showMessage(
+        "Password update ho gaya! Ab naye password se login karo."
       );
-
-      showAuthForm("loginForm");
-      showMessage("Logout successful.", "success");
     } catch (error) {
-      showMessage(friendlyError(error), "error");
+      showMessage(friendlyError(error), true);
+    } finally {
+      setBusy(form, false);
     }
   }
 
-  /* ------------------------------------------
-     Session Check
-  ------------------------------------------ */
-
-  async function getCurrentUser() {
-    const supabase = getSupabase();
-
-    if (!supabase) return null;
-
-    const { data, error } =
-      await supabase.auth.getUser();
-
-    if (error) {
-      console.warn("Could not retrieve current user.");
-      return null;
-    }
-
-    return data.user || null;
+  function attach(formId, handler) {
+    const form = getElement(formId);
+    if (form) form.addEventListener("submit", handler);
   }
 
-  /* ------------------------------------------
-     Form Event Setup
-  ------------------------------------------ */
+  attach("signupForm", signup);
+  attach("otpForm", verifyOtp);
+  attach("loginForm", login);
+  attach("forgotForm", forgotPassword);
+  attach("resetForm", resetPassword);
 
-  function attachSubmit(id, handler) {
-    const form = getElement(id);
-
-    if (form) {
-      form.addEventListener("submit", handler);
-    }
-  }
-
-  function attachClick(id, handler) {
-    const element = getElement(id);
-
-    if (element) {
-      element.addEventListener("click", handler);
-    }
-  }
-
-  function initAuth() {
-    attachSubmit("signupForm", registerUser);
-    attachSubmit("otpForm", verifyRegistrationOtp);
-    attachSubmit("loginForm", loginUser);
-    attachSubmit("forgotForm", sendPasswordReset);
-    attachSubmit("resetForm", updatePassword);
-
-    attachClick("resendOtp", resendOtp);
-    attachClick("logoutButton", logoutUser);
-
-    attachClick("showLogin", () =>
-      showAuthForm("loginForm")
-    );
-
-    attachClick("showForgot", () =>
-      showAuthForm("forgotForm")
-    );
-
-    attachClick("showSignup", () =>
-      showAuthForm("signupForm")
-    );
-
-    attachClick("backToLogin", () =>
-      showAuthForm("loginForm")
-    );
-
-    // Listen for Supabase session changes.
-
-    const supabase = getSupabase();
-
-    if (supabase) {
-      supabase.auth.onAuthStateChange((event, session) => {
-        window.dispatchEvent(
-          new CustomEvent("ds:auth-changed", {
-            detail: {
-              event,
-              user: session?.user || null
-            }
-          })
-        );
-      });
-    }
-  }
-
-  // Public functions for other project files.
+  getElement("resendOtp")?.addEventListener("click", resendOtp);
 
   window.DigitalServicesAuth = {
-    init: initAuth,
-    getCurrentUser,
-    logout: logoutUser,
-    showAuthForm,
-    showMessage
+    signup,
+    verifyOtp,
+    login,
+    resendOtp,
+    forgotPassword,
+    resetPassword
   };
 
-  if (document.readyState === "loading") {
-    document.addEventListener(
-      "DOMContentLoaded",
-      initAuth
-    );
-  } else {
-    initAuth();
+  // Password recovery link se wapas aane par reset form kholne ki koshish.
+  const supabase = getSupabase();
+
+  if (supabase) {
+    supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        window.openDigitalServicesAuth?.("reset");
+        showMessage("Apna naya password set karo.");
+      }
+    });
   }
 })();
