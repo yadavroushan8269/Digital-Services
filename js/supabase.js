@@ -1,59 +1,70 @@
-"use strict";
+/* ==========================================
+   DIGITAL-SERVICES
+   SUPABASE CLIENT CONFIGURATION
+========================================== */
 
 (function () {
-    // ===================================
-    // SUPABASE CONFIGURATION
-    // ===================================
+  "use strict";
 
-    const SUPABASE_URL = "https://qzkqkfmueejeyjjdqfts.supabase.co/rest/v1/";
-    const SUPABASE_KEY = "sb_publishable_Ua7940LgyOi8a7g7zTFzdg_xLojVla_";
+  // Replace these placeholders with your own
+  // Supabase Project URL and Publishable Key.
 
-    // ===================================
-    // CHECK SUPABASE LIBRARY
-    // ===================================
+  const SUPABASE_URL = "https://qzkqkfmueejeyjjdqfts.supabase.co/rest/v1/";
 
-    if (!window.supabase || !window.supabase.createClient) {
-        console.error("Supabase library load nahi hui.");
-        return;
-    }
+  const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_Ua7940LgyOi8a7g7zTFzdg_xLojVla_";
 
-    // ===================================
-    // CHECK CONFIGURATION
-    // ===================================
+  // Prevent duplicate initialization.
 
-    if (
-        !SUPABASE_URL.startsWith("https://") ||
-        !SUPABASE_URL.endsWith(".supabase.co") ||
-        SUPABASE_KEY.startsWith("PASTE_")
-    ) {
-        console.error(
-            "Supabase URL ya Publishable Key sahi se configure nahi hai."
-        );
-        return;
-    }
+  if (window.digitalServicesSupabase) {
+    return;
+  }
 
-    // ===================================
-    // CREATE SUPABASE CLIENT
-    // ===================================
+  // Check whether Supabase library is loaded.
 
-    try {
-        window.digitalServicesSupabase =
-            window.supabase.createClient(
-                SUPABASE_URL,
-                SUPABASE_KEY,
-                {
-                    auth: {
-                        autoRefreshToken: true,
-                        persistSession: true,
-                        detectSessionInUrl: true,
-                        flowType: "pkce"
-                    }
-                }
-            );
+  if (!window.supabase || !window.supabase.createClient) {
+    console.error(
+      "Supabase library missing. Check the Supabase CDN script."
+    );
+    return;
+  }
 
-        console.log("Supabase client initialized successfully.");
+  // Check configuration.
 
-    } catch (error) {
-        console.error("Supabase initialization error:", error);
-    }
+  if (
+    SUPABASE_URL === "YOUR_SUPABASE_PROJECT_URL" ||
+    SUPABASE_PUBLISHABLE_KEY ===
+      "YOUR_SUPABASE_PUBLISHABLE_KEY"
+  ) {
+    console.warn(
+      "Digital-Services: Add your Supabase project URL and publishable key."
+    );
+    return;
+  }
+
+  // Initialize Supabase.
+
+  try {
+    window.digitalServicesSupabase =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY,
+        {
+          auth: {
+            autoRefreshToken: true,
+            persistSession: true,
+            detectSessionInUrl: true
+          }
+        }
+      );
+
+    console.log(
+      "Digital-Services: Supabase client initialized."
+    );
+  } catch (error) {
+    console.error(
+      "Supabase initialization failed:",
+      error.message
+    );
+  }
 })();
